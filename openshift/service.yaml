@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: holidays-api
+  namespace: holidays
+  labels:
+    app: holidays-api
+spec:
+  selector:
+    app: holidays-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+      protocol: TCP
+  type: ClusterIP

@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: holidays-api
+  namespace: holidays
+  labels:
+    app: holidays-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: holidays-api
+  template:
+    metadata:
+      labels:
+        app: holidays-api
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 0
+        fsGroup: 0
+      containers:
+        - name: holidays-api
+          image: quay.io/chiaretto/holidays:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: holidays-config
+            - secretRef:
+                name: holidays-secrets
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          volumeMounts:
+            - name: data-volume
+              mountPath: /opt/app-root/src/data
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: holidays-data-pvc

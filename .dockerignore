@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Development files
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies (will be installed in container)
+node_modules/
+
+# Test files
+test/
+tests/
+*.test.js
+*.spec.js
+coverage/
+.nyc_output/
+jest.config.js
+
+# Database files (will be created at runtime)
+data/
+*.db
+
+# Logs
+logs/
+*.log
+
+# Build artifacts
+dist/
+build/
+
+# OpenShift/Kubernetes
+openshift/
+k8s/
+*.yaml
+!docker-compose.yaml
+
+# Scripts
+*.sh

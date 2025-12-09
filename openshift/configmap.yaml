@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: holidays-config
+  namespace: holidays
+  labels:
+    app: holidays-api
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  DATABASE_PATH: "/opt/app-root/src/data/holidays.db"
+  JWT_EXPIRES_IN: "24h"

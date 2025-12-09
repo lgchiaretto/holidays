@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Holidays</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>🗓️ Holidays</h2>
+        <div class="user-info">
+          <span id="user-name">Loading...</span>
+          <span class="role-badge user">User</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="active" data-page="holidays">📅 Holidays</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-secondary btn-block" id="logout-btn">
+          🚪 Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <h1>📅 Holiday Calendar</h1>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="total-holidays">0</div>
+          <div class="stat-label">Total Holidays</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="national-holidays">0</div>
+          <div class="stat-label">National</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="upcoming-holidays">0</div>
+          <div class="stat-label">Upcoming (30 days)</div>
+        </div>
+      </div>
+
+      <!-- Upcoming Holidays -->
+      <div class="card">
+        <div class="card-header">
+          <h2>🔜 Upcoming Holidays</h2>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody id="upcoming-table-body">
+              <tr>
+                <td colspan="4" style="text-align: center;">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card">
+        <div class="card-header">
+          <h2>🔍 Search Holidays</h2>
+        </div>
+        <div class="filters">
+          <div class="filter-group">
+            <label>Year</label>
+            <select id="filter-year">
+              <option value="">All Years</option>
+              <option value="2024">2024</option>
+              <option value="2025" selected>2025</option>
+              <option value="2026">2026</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Type</label>
+            <select id="filter-type">
+              <option value="">All Types</option>
+              <option value="national">National</option>
+              <option value="state">State</option>
+              <option value="municipal">Municipal</option>
+              <option value="optional">Optional</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Search</label>
+            <input type="text" id="filter-search" placeholder="Search holidays...">
+          </div>
+        </div>
+      </div>
+
+      <!-- All Holidays Table -->
+      <div class="card">
+        <div class="card-header">
+          <h2>📋 All Holidays</h2>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Recurring</th>
+              </tr>
+            </thead>
+            <tbody id="holidays-table-body">
+              <tr>
+                <td colspan="5" style="text-align: center;">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Check Date -->
+      <div class="card">
+        <div class="card-header">
+          <h2>📆 Check if Date is Holiday</h2>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+          <div class="filter-group">
+            <label>Date (DD/MM/YYYY)</label>
+            <input type="text" id="check-date" placeholder="25/12/2025" pattern="\d{2}/\d{2}/\d{4}">
+          </div>
+          <button class="btn btn-primary" id="check-date-btn">Check</button>
+        </div>
+        <div id="check-result" style="margin-top: 1rem; display: none;">
+          <div id="check-result-content"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    const API_URL = '/api';
+    let token = localStorage.getItem('token');
+    let currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+    // Check authentication
+    if (!token) {
+      window.location.href = '/login.html';
+    }
+
+    // Redirect admin to admin dashboard
+    if (currentUser.role === 'admin') {
+      window.location.href = '/admin/dashboard.html';
+    }
+
+    // Display user name
+    document.getElementById('user-name').textContent = currentUser.name || currentUser.email;
+
+    // API helpers
+    async function apiRequest(endpoint, options = {}) {
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          ...options.headers
+        }
+      });
+
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login.html';
+        return;
+      }
+
+      return response.json();
+    }
+
+    // Toast notifications
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login.html';
+    });
+
+    // Load holidays
+    async function loadHolidays() {
+      const year = document.getElementById('filter-year').value;
+      const type = document.getElementById('filter-type').value;
+      const search = document.getElementById('filter-search').value;
+
+      let query = '?limit=200&active=true';
+      if (year) query += `&year=${year}`;
+      if (type) query += `&type=${type}`;
+      if (search) query += `&search=${search}`;
+
+      const data = await apiRequest(`/holidays${query}`);
+      
+      if (data.success) {
+        renderHolidaysTable(data.data);
+        document.getElementById('total-holidays').textContent = data.pagination.total;
+        
+        // Count national
+        const national = data.data.filter(h => h.type === 'national').length;
+        document.getElementById('national-holidays').textContent = national;
+      }
+    }
+
+    async function loadUpcoming() {
+      const data = await apiRequest('/holidays/upcoming?days=30');
+      if (data.success) {
+        document.getElementById('upcoming-holidays').textContent = data.data.length;
+        renderUpcomingTable(data.data);
+      }
+    }
+
+    function renderHolidaysTable(holidays) {
+      const tbody = document.getElementById('holidays-table-body');
+      
+      if (holidays.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No holidays found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = holidays.map(holiday => `
+        <tr>
+          <td><strong>${holiday.date}</strong></td>
+          <td>${holiday.name}</td>
+          <td><span class="badge badge-${holiday.type}">${holiday.type}</span></td>
+          <td>${holiday.description || '-'}</td>
+          <td>${holiday.recurring ? '✅' : '❌'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderUpcomingTable(holidays) {
+      const tbody = document.getElementById('upcoming-table-body');
+      
+      if (holidays.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No upcoming holidays in the next 30 days</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = holidays.map(holiday => `
+        <tr>
+          <td><strong>${holiday.date}</strong></td>
+          <td>${holiday.name}</td>
+          <td><span class="badge badge-${holiday.type}">${holiday.type}</span></td>
+          <td>${holiday.description || '-'}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Filter listeners
+    ['filter-year', 'filter-type'].forEach(id => {
+      document.getElementById(id).addEventListener('change', loadHolidays);
+    });
+    
+    let searchTimeout;
+    document.getElementById('filter-search').addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(loadHolidays, 300);
+    });
+
+    // Check date
+    document.getElementById('check-date-btn').addEventListener('click', async () => {
+      const date = document.getElementById('check-date').value;
+      if (!date) {
+        showToast('Please enter a date', 'error');
+        return;
+      }
+
+      const data = await apiRequest(`/holidays/check/${encodeURIComponent(date)}`);
+      const resultDiv = document.getElementById('check-result');
+      const contentDiv = document.getElementById('check-result-content');
+      
+      resultDiv.style.display = 'block';
+      
+      if (data.success) {
+        if (data.data.is_holiday) {
+          const holidays = data.data.holidays.map(h => `<li><strong>${h.name}</strong> (${h.type})</li>`).join('');
+          contentDiv.innerHTML = `
+            <div style="background: #dcfce7; padding: 1rem; border-radius: 8px; color: #16a34a;">
+              <strong>✅ Yes! ${date} is a holiday.</strong>
+              <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">${holidays}</ul>
+            </div>
+          `;
+        } else {
+          contentDiv.innerHTML = `
+            <div style="background: #fee2e2; padding: 1rem; border-radius: 8px; color: #dc2626;">
+              <strong>❌ No, ${date} is not a holiday.</strong>
+            </div>
+          `;
+        }
+      } else {
+        contentDiv.innerHTML = `
+          <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; color: #d97706;">
+            <strong>⚠️ Error:</strong> ${data.error}
+          </div>
+        `;
+      }
+    });
+
+    // Initial load
+    loadHolidays();
+    loadUpcoming();
+  </script>
+</body>
+</html>
