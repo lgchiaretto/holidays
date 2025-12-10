@@ -1,107 +1,168 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Holidays - User Login</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <title>Login - Holidays API</title>
+  <link rel="stylesheet" href="/css/patternfly.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #151515 0%, #3c3f42 100%);
+      min-height: 100vh;
+    }
+  </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="login-box">
-      <h1>🗓️ Holidays</h1>
-      <p class="subtitle">Holiday Management System</p>
+  <div class="pf-c-login">
+    <div class="pf-c-login__container">
+      <header class="pf-c-login__header">
+        <div class="pf-c-login__header-brand">
+          <i class="fas fa-calendar-check" style="color: var(--pf-global--primary-color--100);"></i>
+          Holidays API
+        </div>
+      </header>
       
-      <div style="text-align: center;">
-        <span class="login-type-badge user">User Access</span>
-      </div>
+      <main class="pf-c-login__main">
+        <header class="pf-c-login__main-header">
+          <h1 class="pf-c-login__main-header-title">Login de Usuário</h1>
+          <p class="pf-c-login__main-header-desc">Acesse o sistema para visualizar os feriados cadastrados</p>
+        </header>
 
-      <div id="error-message" class="error-message"></div>
+        <div id="alertContainer"></div>
 
-      <form id="login-form">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="user@example.com" required>
-        </div>
+        <form class="pf-c-form" id="loginForm">
+          <div class="pf-c-form__group">
+            <label class="pf-c-form__label" for="email">
+              E-mail
+              <span class="pf-c-form__label-required">*</span>
+            </label>
+            <input 
+              type="email" 
+              class="pf-c-form-control" 
+              id="email" 
+              name="email" 
+              placeholder="seu@email.com"
+              required
+            >
+          </div>
 
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter your password" required>
-        </div>
+          <div class="pf-c-form__group">
+            <label class="pf-c-form__label" for="password">
+              Senha
+              <span class="pf-c-form__label-required">*</span>
+            </label>
+            <input 
+              type="password" 
+              class="pf-c-form-control" 
+              id="password" 
+              name="password" 
+              placeholder="Sua senha"
+              required
+            >
+          </div>
 
-        <button type="submit" class="btn btn-primary btn-block" id="login-btn">
-          <span id="btn-text">Login</span>
-          <div id="btn-spinner" class="spinner" style="display: none;"></div>
-        </button>
-      </form>
+          <div class="pf-c-form__actions">
+            <button type="submit" class="pf-c-button pf-m-primary pf-m-block" id="submitBtn">
+              <i class="fas fa-sign-in-alt"></i> Entrar
+            </button>
+          </div>
+        </form>
 
-      <div class="login-links">
-        <p>Admin? <a href="/admin/">Login here</a></p>
-      </div>
+        <footer class="pf-c-login__footer">
+          <p>É administrador?</p>
+          <a href="/admin/index.html" class="pf-c-login__footer-link">
+            <i class="fas fa-user-shield"></i> Acessar painel administrativo
+          </a>
+        </footer>
+      </main>
+
+      <footer style="text-align: center; margin-top: var(--pf-global--spacer--lg);">
+        <a href="/" style="color: var(--pf-global--Color--light-100); opacity: 0.7;">
+          <i class="fas fa-arrow-left"></i> Voltar ao início
+        </a>
+      </footer>
     </div>
   </div>
 
   <script>
-    const API_URL = '/api';
-
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
+    const API_URL = '';
+    
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const alertContainer = document.getElementById('alertContainer');
       
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      const errorMessage = document.getElementById('error-message');
-      const loginBtn = document.getElementById('login-btn');
-      const btnText = document.getElementById('btn-text');
-      const btnSpinner = document.getElementById('btn-spinner');
-
-      // Show loading
-      btnText.style.display = 'none';
-      btnSpinner.style.display = 'block';
-      loginBtn.disabled = true;
-      errorMessage.classList.remove('show');
-
+      
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="pf-c-spinner"></span> Entrando...';
+      alertContainer.innerHTML = '';
+      
       try {
-        const response = await fetch(`${API_URL}/auth/login`, {
+        const response = await fetch(`${API_URL}/api/auth/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ email, password })
         });
-
+        
         const data = await response.json();
-
+        
         if (data.success) {
-          // Store token and user info
           localStorage.setItem('token', data.data.token);
           localStorage.setItem('user', JSON.stringify(data.data.user));
           
-          // Redirect based on role
-          if (data.data.user.role === 'admin') {
-            window.location.href = '/admin/dashboard.html';
-          } else {
+          alertContainer.innerHTML = `
+            <div class="pf-c-alert pf-m-success">
+              <div class="pf-c-alert__icon"><i class="fas fa-check-circle"></i></div>
+              <div>
+                <div class="pf-c-alert__title">Login realizado com sucesso!</div>
+                <div class="pf-c-alert__description">Redirecionando...</div>
+              </div>
+            </div>
+          `;
+          
+          setTimeout(() => {
             window.location.href = '/user/dashboard.html';
-          }
+          }, 1000);
         } else {
-          errorMessage.textContent = data.error || 'Login failed';
-          errorMessage.classList.add('show');
+          alertContainer.innerHTML = `
+            <div class="pf-c-alert pf-m-danger">
+              <div class="pf-c-alert__icon"><i class="fas fa-exclamation-circle"></i></div>
+              <div>
+                <div class="pf-c-alert__title">Erro no login</div>
+                <div class="pf-c-alert__description">${data.error || 'Credenciais inválidas'}</div>
+              </div>
+            </div>
+          `;
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar';
         }
       } catch (error) {
-        errorMessage.textContent = 'Connection error. Please try again.';
-        errorMessage.classList.add('show');
-      } finally {
-        btnText.style.display = 'block';
-        btnSpinner.style.display = 'none';
-        loginBtn.disabled = false;
+        alertContainer.innerHTML = `
+          <div class="pf-c-alert pf-m-danger">
+            <div class="pf-c-alert__icon"><i class="fas fa-exclamation-circle"></i></div>
+            <div>
+              <div class="pf-c-alert__title">Erro de conexão</div>
+              <div class="pf-c-alert__description">Não foi possível conectar ao servidor. Tente novamente.</div>
+            </div>
+          </div>
+        `;
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar';
       }
     });
 
     // Check if already logged in
     const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
-    if (token && user) {
-      const userData = JSON.parse(user);
-      if (userData.role === 'admin') {
+    if (token) {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.role === 'admin') {
         window.location.href = '/admin/dashboard.html';
       } else {
         window.location.href = '/user/dashboard.html';

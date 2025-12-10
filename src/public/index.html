@@ -1,39 +1,175 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Holidays - Welcome</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <title>Holidays API - Sistema de Gestão de Feriados</title>
+  <link rel="stylesheet" href="/css/patternfly.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .hero-section {
+      background: linear-gradient(135deg, var(--pf-global--BackgroundColor--dark-300) 0%, var(--pf-global--BackgroundColor--dark-100) 100%);
+      color: var(--pf-global--Color--light-100);
+      padding: var(--pf-global--spacer--2xl) var(--pf-global--spacer--lg);
+      text-align: center;
+    }
+    .hero-section h1 {
+      font-size: var(--pf-global--FontSize--4xl);
+      margin-bottom: var(--pf-global--spacer--md);
+    }
+    .hero-section p {
+      font-size: var(--pf-global--FontSize--lg);
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto var(--pf-global--spacer--xl);
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--pf-global--spacer--lg);
+      padding: var(--pf-global--spacer--2xl) var(--pf-global--spacer--lg);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .feature-card {
+      text-align: center;
+      padding: var(--pf-global--spacer--xl);
+    }
+    .feature-card i {
+      font-size: 3rem;
+      color: var(--pf-global--primary-color--100);
+      margin-bottom: var(--pf-global--spacer--md);
+    }
+    .feature-card h3 {
+      margin-bottom: var(--pf-global--spacer--sm);
+    }
+    .feature-card p {
+      color: var(--pf-global--Color--200);
+    }
+    .cta-buttons {
+      display: flex;
+      gap: var(--pf-global--spacer--md);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cta-buttons .pf-c-button {
+      padding: var(--pf-global--spacer--md) var(--pf-global--spacer--xl);
+      font-size: var(--pf-global--FontSize--md);
+    }
+    .footer {
+      background-color: var(--pf-global--BackgroundColor--dark-300);
+      color: var(--pf-global--Color--light-100);
+      text-align: center;
+      padding: var(--pf-global--spacer--lg);
+      margin-top: auto;
+    }
+    .footer a {
+      color: var(--pf-global--Color--light-100);
+      opacity: 0.8;
+    }
+    .footer a:hover {
+      opacity: 1;
+    }
+    .main-nav {
+      background-color: var(--pf-global--BackgroundColor--dark-300);
+      padding: var(--pf-global--spacer--md) var(--pf-global--spacer--lg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .main-nav .brand {
+      color: var(--pf-global--Color--light-100);
+      font-size: var(--pf-global--FontSize--xl);
+      font-weight: 600;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: var(--pf-global--spacer--sm);
+    }
+    .main-nav .nav-links {
+      display: flex;
+      gap: var(--pf-global--spacer--md);
+    }
+    .main-nav .nav-links a {
+      color: var(--pf-global--Color--light-100);
+      text-decoration: none;
+      padding: var(--pf-global--spacer--sm) var(--pf-global--spacer--md);
+      border-radius: var(--pf-global--BorderRadius--sm);
+      transition: background-color 0.2s;
+    }
+    .main-nav .nav-links a:hover {
+      background-color: var(--pf-global--BackgroundColor--dark-400);
+    }
+  </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="login-box" style="text-align: center;">
-      <h1>🗓️ Holidays</h1>
-      <p class="subtitle">Holiday Management System</p>
-      
-      <div style="margin: 2rem 0;">
-        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-          Welcome to the Holiday Management System.<br>
-          Please select your login type:
-        </p>
-        
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-          <a href="/login.html" class="btn btn-primary btn-block">
-            👤 User Login
-          </a>
-          <a href="/admin/" class="btn btn-danger btn-block">
-            🔐 Admin Login
-          </a>
-        </div>
-      </div>
-
-      <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-        <p style="font-size: 0.75rem; color: var(--text-secondary);">
-          API Documentation: <a href="/api-docs" target="_blank">/api-docs</a>
-        </p>
-      </div>
+  <nav class="main-nav">
+    <a href="/" class="brand">
+      <i class="fas fa-calendar-check"></i>
+      Holidays API
+    </a>
+    <div class="nav-links">
+      <a href="/api-docs" target="_blank"><i class="fas fa-book"></i> API Docs</a>
+      <a href="/login.html"><i class="fas fa-user"></i> Usuário</a>
+      <a href="/admin/index.html"><i class="fas fa-user-shield"></i> Admin</a>
     </div>
-  </div>
+  </nav>
+
+  <section class="hero-section">
+    <h1><i class="fas fa-calendar-alt"></i> Holidays API</h1>
+    <p>Sistema completo de gestão de feriados nacionais, estaduais e municipais do Brasil com API RESTful e autenticação JWT.</p>
+    <div class="cta-buttons">
+      <a href="/login.html" class="pf-c-button pf-m-primary">
+        <i class="fas fa-sign-in-alt"></i> Login Usuário
+      </a>
+      <a href="/admin/index.html" class="pf-c-button pf-m-secondary" style="border-color: white; color: white;">
+        <i class="fas fa-user-shield"></i> Login Admin
+      </a>
+      <a href="/api-docs" target="_blank" class="pf-c-button pf-m-secondary" style="border-color: white; color: white;">
+        <i class="fas fa-book"></i> Documentação API
+      </a>
+    </div>
+  </section>
+
+  <section class="features-grid">
+    <div class="pf-c-card feature-card">
+      <i class="fas fa-flag"></i>
+      <h3>Feriados Brasileiros</h3>
+      <p>Cadastro completo de feriados nacionais, estaduais, municipais e opcionais com suporte ao formato brasileiro DD/MM/AAAA.</p>
+    </div>
+    <div class="pf-c-card feature-card">
+      <i class="fas fa-lock"></i>
+      <h3>Autenticação JWT</h3>
+      <p>Sistema seguro de autenticação com tokens JWT, controle de roles (admin/usuário) e proteção de endpoints.</p>
+    </div>
+    <div class="pf-c-card feature-card">
+      <i class="fas fa-code"></i>
+      <h3>API RESTful</h3>
+      <p>API completa com endpoints para CRUD de feriados, gestão de usuários e documentação Swagger interativa.</p>
+    </div>
+    <div class="pf-c-card feature-card">
+      <i class="fas fa-database"></i>
+      <h3>SQLite Database</h3>
+      <p>Armazenamento leve e eficiente com SQLite, ideal para containers e deployments em Kubernetes/OpenShift.</p>
+    </div>
+    <div class="pf-c-card feature-card">
+      <i class="fab fa-docker"></i>
+      <h3>Container Ready</h3>
+      <p>Imagem Docker otimizada com Red Hat UBI, pronta para deploy em OpenShift, Kubernetes ou Podman.</p>
+    </div>
+    <div class="pf-c-card feature-card">
+      <i class="fas fa-paint-brush"></i>
+      <h3>PatternFly UI</h3>
+      <p>Interface moderna baseada no design system PatternFly da Red Hat, com experiência consistente e profissional.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>&copy; 2025 Holidays API - Sistema de Gestão de Feriados</p>
+    <p>
+      <a href="/api-docs" target="_blank">API Documentation</a> | 
+      <a href="https://github.com" target="_blank">GitHub</a>
+    </p>
+  </footer>
 </body>
 </html>

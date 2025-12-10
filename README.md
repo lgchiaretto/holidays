@@ -1,437 +1,271 @@
-# Holidays API
+# Holidays API 🗓️
 
-A RESTful API for managing holidays with JWT authentication and a web interface. Supports admin and regular user roles, Brazilian date format (DD/MM/YYYY), and SQLite for portable database storage.
+Sistema completo de gestão de feriados nacionais, estaduais e municipais do Brasil com API RESTful e autenticação JWT.
 
-## Features
+## 🌟 Características
 
-- 🔐 **JWT Authentication** - Secure token-based authentication
-- 👥 **Role-based Access** - Admin (full CRUD) and User (read-only) roles
-- 🖥️ **Web Interface** - Separate login pages for admin and users
-- 📅 **Brazilian Date Format** - Dates displayed as DD/MM/YYYY
-- 🗃️ **SQLite Database** - Portable and lightweight
-- 📖 **Swagger Documentation** - Interactive API documentation
-- 🐳 **Container Ready** - Podman/Docker support with Red Hat UBI image
-- ☸️ **OpenShift/Kubernetes** - Production deployment manifests
+- **API RESTful** completa para CRUD de feriados
+- **Autenticação JWT** com controle de roles (admin/usuário)
+- **Formato brasileiro** de datas (DD/MM/AAAA)
+- **Tipos de feriados**: Nacional, Estadual, Municipal, Facultativo
+- **Interface PatternFly** moderna e responsiva
+- **SQLite** para armazenamento leve e eficiente
+- **Container Ready** com Red Hat UBI
+- **Documentação Swagger** interativa
 
-## Default Users
+## 📋 Pré-requisitos
 
-| User | Email | Password | Role |
-|------|-------|----------|------|
-| Administrator | `admin@holidays.local` | `teste` | admin |
-| Salgadinho | `salgadinho@holidays.local` | `teste123` | user |
+- **Node.js** 18+ (recomendado: 22)
+- **npm** ou **yarn**
+- **Podman** ou **Docker** (para containers)
 
-## Web Interface
+## 🚀 Instalação
 
-- **Home Page**: `http://localhost:3000/` - Choose login type
-- **User Login**: `http://localhost:3000/login.html` - Regular user login
-- **Admin Login**: `http://localhost:3000/admin/` - Admin login
-- **User Dashboard**: `http://localhost:3000/user/dashboard.html` - View holidays
-- **Admin Dashboard**: `http://localhost:3000/admin/dashboard.html` - Manage holidays and users
-
-## Quick Start
-
-### Running Locally (Development)
+### Desenvolvimento Local
 
 ```bash
-# Install dependencies
+# Clone o repositório
+git clone https://github.com/lgchiaretto/holidays.git
+cd holidays
+
+# Instale as dependências
 npm install
 
-# Copy environment file
-cp .env.example .env
-
-# Initialize database and create admin user
-npm run init-db
-
-# Seed with Brazilian holidays (optional)
+# Execute o seed do banco (cria usuários e feriados de exemplo)
 npm run seed
 
-# Start the server
-npm start
-
-# Or in development mode with auto-reload
+# Inicie o servidor em modo desenvolvimento
 npm run dev
 ```
 
-The API will be available at `http://localhost:3000`
+O servidor estará disponível em: http://localhost:3000
 
-### Running with Podman
+### Credenciais Padrão
 
-#### Option 1: Quick Start (Pull from Registry)
+| Usuário | E-mail | Senha | Função |
+|---------|--------|-------|--------|
+| Administrator | admin@holidays.local | teste | admin |
+| Salgadinho | salgadinho@holidays.local | teste123 | user |
+
+## 🧪 Testes
+
+### Executar Testes Unitários
 
 ```bash
-# Run the container
-podman run -d \
-  --name holidays-api \
-  -p 3000:3000 \
-  -v holidays-data:/app/data \
-  -e JWT_SECRET="your-secret-key-change-in-production" \
-  -e ADMIN_EMAIL="admin@holidays.local" \
-  -e ADMIN_PASSWORD="admin123" \
-  quay.io/chiaretto/holidays:latest
+# Executar todos os testes
+npm test
 
-# Check logs
-podman logs -f holidays-api
+# Executar testes com watch mode
+npm run test:watch
 
-# Stop the container
-podman stop holidays-api
+# Executar testes com cobertura
+npm run test:coverage
 
-# Remove the container
-podman rm holidays-api
+# Executar testes com output detalhado
+npm run test:verbose
 ```
 
-#### Option 2: Build and Run Locally
+### Estrutura de Testes
 
-```bash
-# Build the image
-./build.sh
-
-# Or with custom image name
-./build.sh myregistry/holidays v1.0.0
-
-# Run the container
-podman run -d \
-  --name holidays-api \
-  -p 3000:3000 \
-  -v holidays-data:/app/data \
-  -e JWT_SECRET="your-secret-key-change-in-production" \
-  -e ADMIN_EMAIL="admin@holidays.local" \
-  -e ADMIN_PASSWORD="admin123" \
-  quay.io/chiaretto/holidays:latest
+```
+tests/
+├── setup.js              # Configuração do Jest
+├── helpers.js            # Utilitários de teste
+├── api/
+│   ├── auth.test.js      # Testes da API de autenticação
+│   └── holidays.test.js  # Testes da API de feriados
+├── config/
+│   └── config.test.js    # Testes de configuração
+├── middleware/
+│   └── auth.test.js      # Testes de middleware
+├── models/
+│   └── holiday.test.js   # Testes de modelo
+└── utils/
+    └── date.test.js      # Testes de utilitários de data
 ```
 
-#### Podman Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Server port | `3000` |
-| `NODE_ENV` | Environment mode | `production` |
-| `JWT_SECRET` | Secret key for JWT tokens | (required) |
-| `JWT_EXPIRES_IN` | Token expiration time | `24h` |
-| `DATABASE_PATH` | Path to SQLite database | `/app/data/holidays.db` |
-| `ADMIN_EMAIL` | Initial admin email | `admin@holidays.local` |
-| `ADMIN_PASSWORD` | Initial admin password | `admin123` |
-
-### Running on OpenShift
-
-#### Prerequisites
-
-- OpenShift CLI (`oc`) installed
-- Logged in to an OpenShift cluster (`oc login`)
-- Push access to a container registry (e.g., quay.io)
-
-#### Build and Deploy
+### Testes de API com cURL
 
 ```bash
-# Build image, push to registry, and deploy to OpenShift
-./build-and-deploy.sh
-
-# Or with custom image
-./build-and-deploy.sh myregistry/holidays v1.0.0
-```
-
-#### Deploy Only (Image already in registry)
-
-```bash
-# Deploy using default image
-./deploy.sh
-
-# Or with custom image
-./deploy.sh myregistry/holidays v1.0.0
-```
-
-#### Build Only
-
-```bash
-# Build the container image
-./build.sh
-
-# Or with custom image name and tag
-./build.sh myregistry/holidays v1.0.0
-```
-
-#### Cleanup
-
-```bash
-# Remove all resources (will ask for confirmation)
-./cleanup.sh
-
-# Force cleanup without confirmation
-./cleanup.sh --force
-```
-
-## API Documentation
-
-Interactive Swagger documentation is available at `/api-docs` when the server is running.
-
-### Authentication
-
-#### Login
-
-```bash
+# Login como admin
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email": "admin@holidays.local", "password": "admin123"}'
-```
+  -d '{"email": "admin@holidays.local", "password": "teste"}'
 
-Response:
-```json
-{
-  "success": true,
-  "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "user": {
-      "id": 1,
-      "email": "admin@holidays.local",
-      "name": "Administrator",
-      "role": "admin"
-    }
-  }
-}
-```
+# Listar feriados (público)
+curl http://localhost:3000/api/holidays
 
-#### Register New User
+# Listar feriados de 2025
+curl "http://localhost:3000/api/holidays?year=2025"
 
-```bash
-curl -X POST http://localhost:3000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com", "password": "password123", "name": "John Doe"}'
-```
-
-### Holidays API
-
-All holiday endpoints require authentication. Include the JWT token in the `Authorization` header:
-
-```bash
-Authorization: Bearer <your-token>
-```
-
-#### List Holidays
-
-```bash
-# List all holidays
-curl -X GET http://localhost:3000/api/holidays \
-  -H "Authorization: Bearer <token>"
-
-# Filter by year
-curl -X GET "http://localhost:3000/api/holidays?year=2025" \
-  -H "Authorization: Bearer <token>"
-
-# Filter by type
-curl -X GET "http://localhost:3000/api/holidays?type=national" \
-  -H "Authorization: Bearer <token>"
-
-# Filter by date range (Brazilian format)
-curl -X GET "http://localhost:3000/api/holidays?start_date=01/01/2025&end_date=31/12/2025" \
-  -H "Authorization: Bearer <token>"
-```
-
-#### Get Holidays by Year
-
-```bash
-curl -X GET http://localhost:3000/api/holidays/year/2025 \
-  -H "Authorization: Bearer <token>"
-```
-
-#### Get Holidays by Month
-
-```bash
-curl -X GET http://localhost:3000/api/holidays/year/2025/month/12 \
-  -H "Authorization: Bearer <token>"
-```
-
-#### Check if Date is Holiday
-
-```bash
-# Brazilian format
-curl -X GET http://localhost:3000/api/holidays/check/25/12/2025 \
-  -H "Authorization: Bearer <token>"
-
-# ISO format
-curl -X GET http://localhost:3000/api/holidays/check/2025-12-25 \
-  -H "Authorization: Bearer <token>"
-```
-
-#### Get Upcoming Holidays
-
-```bash
-curl -X GET "http://localhost:3000/api/holidays/upcoming?days=30" \
-  -H "Authorization: Bearer <token>"
-```
-
-#### Create Holiday (Admin Only)
-
-```bash
+# Criar feriado (requer token admin)
 curl -X POST http://localhost:3000/api/holidays \
-  -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
-  -d '{
-    "name": "Company Anniversary",
-    "date": "15/03/2025",
-    "type": "optional",
-    "description": "Company foundation day",
-    "recurring": true
-  }'
+  -H "Authorization: Bearer SEU_TOKEN_AQUI" \
+  -d '{"name": "Feriado Teste", "date": "15/03/2025", "type": "municipal"}'
+
+# Verificar se uma data é feriado
+curl "http://localhost:3000/api/holidays/check/25%2F12%2F2025"
+
+# Próximos feriados (30 dias)
+curl http://localhost:3000/api/holidays/upcoming
 ```
 
-#### Update Holiday (Admin Only)
+## 🐳 Testes com Podman/Docker
+
+### Build da Imagem
 
 ```bash
-curl -X PUT http://localhost:3000/api/holidays/1 \
-  -H "Authorization: Bearer <token>" \
+# Build com Podman
+podman build -t holidays-api:latest .
+
+# Build com Docker
+docker build -t holidays-api:latest .
+```
+
+### Execução do Container
+
+```bash
+# Executar com Podman
+podman run -d \
+  --name holidays-api \
+  -p 3000:3000 \
+  -v holidays-data:/opt/app-root/src/data \
+  holidays-api:latest
+
+# Executar com Docker
+docker run -d \
+  --name holidays-api \
+  -p 3000:3000 \
+  -v holidays-data:/opt/app-root/src/data \
+  holidays-api:latest
+```
+
+### Testar o Container
+
+```bash
+# Verificar logs
+podman logs -f holidays-api
+
+# Testar a API
+curl http://localhost:3000/api/holidays
+
+# Testar login
+curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{
-    "name": "Updated Holiday Name",
-    "active": false
-  }'
+  -d '{"email": "admin@holidays.local", "password": "teste"}'
+
+# Acessar o container
+podman exec -it holidays-api sh
 ```
 
-#### Delete Holiday (Admin Only)
+### Executar Testes no Container
 
 ```bash
-curl -X DELETE http://localhost:3000/api/holidays/1 \
-  -H "Authorization: Bearer <token>"
+# Executar testes dentro do container
+podman run --rm holidays-api:latest npm test
+
+# Executar com cobertura
+podman run --rm holidays-api:latest npm run test:coverage
 ```
 
-### User Management (Admin Only)
-
-#### List Users
+### Parar e Remover Container
 
 ```bash
-curl -X GET http://localhost:3000/api/users \
-  -H "Authorization: Bearer <token>"
+# Parar
+podman stop holidays-api
+
+# Remover
+podman rm holidays-api
+
+# Remover imagem
+podman rmi holidays-api:latest
 ```
 
-#### Create User
+## 🔧 Scripts Disponíveis
 
-```bash
-curl -X POST http://localhost:3000/api/users \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "newuser@example.com",
-    "password": "password123",
-    "name": "New User",
-    "role": "user"
-  }'
-```
+| Script | Descrição |
+|--------|-----------|
+| `npm start` | Inicia o servidor em produção |
+| `npm run dev` | Inicia o servidor em modo desenvolvimento |
+| `npm run init-db` | Inicializa o banco de dados |
+| `npm run seed` | Popula o banco com dados de exemplo |
+| `npm test` | Executa os testes |
+| `npm run test:watch` | Executa testes em modo watch |
+| `npm run test:coverage` | Executa testes com relatório de cobertura |
 
-#### Update User
+## 📚 Documentação da API
 
-```bash
-curl -X PUT http://localhost:3000/api/users/2 \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Updated Name",
-    "role": "admin"
-  }'
-```
+A documentação interativa da API está disponível em: http://localhost:3000/api-docs
 
-#### Reset User Password
+### Endpoints Principais
 
-```bash
-curl -X POST http://localhost:3000/api/users/2/reset-password \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"newPassword": "newpassword123"}'
-```
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| POST | `/api/auth/login` | Login | - |
+| POST | `/api/auth/register` | Registrar usuário | - |
+| GET | `/api/holidays` | Listar feriados | - |
+| GET | `/api/holidays/:id` | Obter feriado | - |
+| POST | `/api/holidays` | Criar feriado | Admin |
+| PUT | `/api/holidays/:id` | Atualizar feriado | Admin |
+| DELETE | `/api/holidays/:id` | Excluir feriado | Admin |
+| GET | `/api/holidays/upcoming` | Próximos feriados | - |
+| GET | `/api/holidays/check/:date` | Verificar se é feriado | - |
+| GET | `/api/users` | Listar usuários | Admin |
+| POST | `/api/users` | Criar usuário | Admin |
 
-## Holiday Types
+## 🎨 Interface Web
 
-| Type | Description |
-|------|-------------|
-| `national` | National holidays |
-| `state` | State-level holidays |
-| `municipal` | Municipal holidays |
-| `optional` | Optional/facultative holidays |
+A aplicação possui interface web moderna baseada em PatternFly (Red Hat):
 
-## Date Formats
+- **Página inicial**: `/`
+- **Login usuário**: `/login.html`
+- **Login admin**: `/admin/index.html`
+- **Dashboard usuário**: `/user/dashboard.html`
+- **Dashboard admin**: `/admin/dashboard.html`
 
-The API accepts dates in two formats:
-- **Brazilian format**: `DD/MM/YYYY` (e.g., `25/12/2025`)
-- **ISO format**: `YYYY-MM-DD` (e.g., `2025-12-25`)
-
-Responses include both formats:
-```json
-{
-  "date": "25/12/2025",
-  "date_iso": "2025-12-25"
-}
-```
-
-## Project Structure
+## 📁 Estrutura do Projeto
 
 ```
 holidays/
 ├── src/
-│   ├── config/
-│   │   ├── index.js          # App configuration
-│   │   └── swagger.js        # Swagger/OpenAPI config
-│   ├── controllers/
-│   │   ├── authController.js
-│   │   ├── holidayController.js
-│   │   └── userController.js
-│   ├── database/
-│   │   └── index.js          # SQLite setup
-│   ├── middleware/
-│   │   ├── auth.js           # JWT authentication
-│   │   ├── error.js          # Error handling
-│   │   └── validation.js     # Request validation
-│   ├── models/
-│   │   ├── Holiday.js
-│   │   └── User.js
-│   ├── public/
-│   │   ├── css/
-│   │   │   └── style.css     # Shared styles
-│   │   ├── admin/
-│   │   │   ├── index.html    # Admin login
-│   │   │   └── dashboard.html # Admin dashboard
-│   │   ├── user/
-│   │   │   └── dashboard.html # User dashboard
-│   │   ├── index.html        # Home page
-│   │   └── login.html        # User login
-│   ├── routes/
-│   │   ├── index.js
-│   │   ├── auth.js
-│   │   ├── holidays.js
-│   │   └── users.js
-│   ├── scripts/
-│   │   ├── init-db.js        # Database initialization
-│   │   └── seed.js           # Seed users and holidays
-│   └── index.js              # App entry point
-├── openshift/
-│   ├── namespace.yaml
-│   ├── configmap.yaml
-│   ├── secret.yaml
-│   ├── pvc.yaml
-│   ├── deployment.yaml
-│   ├── service.yaml
-│   └── route.yaml
-├── build.sh
-├── deploy.sh
-├── build-and-deploy.sh
-├── cleanup.sh
-├── Dockerfile                 # Red Hat UBI9 Node.js 22
-├── .dockerignore
-├── .env.example
-├── package.json
-└── README.md
+│   ├── config/           # Configurações
+│   ├── controllers/      # Controladores
+│   ├── database/         # Setup SQLite
+│   ├── middleware/       # Middlewares (auth, validation)
+│   ├── models/           # Modelos (User, Holiday)
+│   ├── public/           # Arquivos estáticos (HTML, CSS)
+│   ├── routes/           # Rotas da API
+│   ├── scripts/          # Scripts utilitários
+│   └── index.js          # Entry point
+├── tests/                # Testes unitários e de integração
+├── openshift/            # Manifests Kubernetes/OpenShift
+├── Dockerfile            # Imagem Docker (Red Hat UBI)
+├── build.sh              # Script de build
+├── deploy.sh             # Script de deploy
+└── package.json
 ```
 
-## Security Considerations
+## 🔐 Variáveis de Ambiente
 
-1. **Change default credentials** in production:
-   - Update `JWT_SECRET` with a strong random string
-   - Change `ADMIN_EMAIL` and `ADMIN_PASSWORD`
+| Variável | Descrição | Padrão |
+|----------|-----------|--------|
+| `PORT` | Porta do servidor | 3000 |
+| `NODE_ENV` | Ambiente (development/production) | development |
+| `JWT_SECRET` | Chave secreta para JWT | (aleatório) |
+| `JWT_EXPIRES_IN` | Tempo de expiração do token | 24h |
+| `DATABASE_PATH` | Caminho do banco SQLite | ./data/holidays.db |
+| `ADMIN_EMAIL` | E-mail do admin padrão | admin@holidays.local |
+| `ADMIN_PASSWORD` | Senha do admin padrão | admin123 |
 
-2. **Update the secret.yaml** before deploying to OpenShift:
-   ```bash
-   # Generate a secure JWT secret
-   openssl rand -base64 32
-   ```
+## 📄 Licença
 
-3. **Enable HTTPS** in production (handled by OpenShift Route with TLS)
+MIT License
 
-## License
+## 👥 Contribuição
 
-MIT
+1. Fork o projeto
+2. Crie sua feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request

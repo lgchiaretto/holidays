@@ -1,158 +1,208 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Holidays</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <title>Dashboard - Holidays API</title>
+  <link rel="stylesheet" href="/css/patternfly.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <div class="dashboard">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2>🗓️ Holidays</h2>
-        <div class="user-info">
-          <span id="user-name">Loading...</span>
-          <span class="role-badge user">User</span>
-        </div>
+  <div class="pf-c-page">
+    <!-- Header -->
+    <header class="pf-c-page__header">
+      <div class="pf-c-page__header-brand">
+        <a href="/" class="pf-c-page__header-brand-link">
+          <i class="fas fa-calendar-check"></i>
+          Holidays API
+        </a>
       </div>
-
-      <nav class="sidebar-nav">
-        <a href="#" class="active" data-page="holidays">📅 Holidays</a>
-      </nav>
-
-      <div class="sidebar-footer">
-        <button class="btn btn-secondary btn-block" id="logout-btn">
-          🚪 Logout
+      <div class="pf-c-page__header-tools">
+        <div class="pf-c-dropdown__toggle">
+          <div class="pf-c-avatar" id="user-avatar">U</div>
+          <span class="pf-c-dropdown__toggle-text" id="user-name">Usuário</span>
+        </div>
+        <button class="pf-c-button pf-m-plain" id="logout-btn" title="Sair">
+          <i class="fas fa-sign-out-alt"></i>
         </button>
       </div>
-    </aside>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="pf-c-page__sidebar">
+      <div class="pf-c-nav">
+        <div class="pf-c-nav__section-title">Menu Principal</div>
+        <ul class="pf-c-nav__list">
+          <li class="pf-c-nav__item">
+            <a href="#" class="pf-c-nav__link pf-m-current" data-page="holidays">
+              <i class="fas fa-calendar-alt"></i> Feriados
+            </a>
+          </li>
+        </ul>
+        <div class="pf-c-nav__section-title" style="margin-top: var(--pf-global--spacer--lg);">Links Úteis</div>
+        <ul class="pf-c-nav__list">
+          <li class="pf-c-nav__item">
+            <a href="/api-docs" target="_blank" class="pf-c-nav__link">
+              <i class="fas fa-book"></i> API Docs
+            </a>
+          </li>
+          <li class="pf-c-nav__item">
+            <a href="/" class="pf-c-nav__link">
+              <i class="fas fa-home"></i> Página Inicial
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
 
     <!-- Main Content -->
-    <main class="main-content">
-      <div class="page-header">
-        <h1>📅 Holiday Calendar</h1>
-      </div>
+    <main class="pf-c-page__main">
+      <section class="pf-c-page__main-section" style="background: transparent; padding-bottom: 0;">
+        <h1 class="pf-c-title pf-m-2xl">
+          <i class="fas fa-calendar-alt"></i> Calendário de Feriados
+        </h1>
+      </section>
 
       <!-- Stats -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value" id="total-holidays">0</div>
-          <div class="stat-label">Total Holidays</div>
+      <section class="pf-c-page__main-section" style="background: transparent;">
+        <div class="pf-l-grid pf-l-grid--cols-3 pf-m-gutter">
+          <div class="pf-c-card pf-c-card--stat">
+            <div class="stat-value" id="total-holidays">0</div>
+            <div class="stat-label">Total de Feriados</div>
+          </div>
+          <div class="pf-c-card pf-c-card--stat">
+            <div class="stat-value" id="national-holidays">0</div>
+            <div class="stat-label">Feriados Nacionais</div>
+          </div>
+          <div class="pf-c-card pf-c-card--stat">
+            <div class="stat-value" id="upcoming-holidays">0</div>
+            <div class="stat-label">Próximos 30 dias</div>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value" id="national-holidays">0</div>
-          <div class="stat-label">National</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="upcoming-holidays">0</div>
-          <div class="stat-label">Upcoming (30 days)</div>
-        </div>
-      </div>
+      </section>
 
       <!-- Upcoming Holidays -->
-      <div class="card">
-        <div class="card-header">
-          <h2>🔜 Upcoming Holidays</h2>
+      <section class="pf-c-page__main-section">
+        <div class="pf-c-card">
+          <div class="pf-c-card__header">
+            <h2 class="pf-c-card__title"><i class="fas fa-clock"></i> Próximos Feriados</h2>
+          </div>
+          <div class="pf-c-card__body" style="padding: 0;">
+            <table class="pf-c-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Nome</th>
+                  <th>Tipo</th>
+                  <th>Descrição</th>
+                </tr>
+              </thead>
+              <tbody id="upcoming-table-body">
+                <tr>
+                  <td colspan="4" style="text-align: center;">
+                    <span class="pf-c-spinner pf-m-md"></span> Carregando...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody id="upcoming-table-body">
-              <tr>
-                <td colspan="4" style="text-align: center;">Loading...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      </section>
 
       <!-- Filters -->
-      <div class="card">
-        <div class="card-header">
-          <h2>🔍 Search Holidays</h2>
+      <section class="pf-c-page__main-section">
+        <div class="pf-c-card">
+          <div class="pf-c-card__header">
+            <h2 class="pf-c-card__title"><i class="fas fa-filter"></i> Buscar Feriados</h2>
+          </div>
+          <div class="pf-c-card__body">
+            <div class="pf-c-toolbar">
+              <div class="pf-c-toolbar__item">
+                <label class="pf-c-toolbar__item-label">Ano</label>
+                <select class="pf-c-form-control" id="filter-year">
+                  <option value="">Todos</option>
+                  <option value="2024">2024</option>
+                  <option value="2025" selected>2025</option>
+                  <option value="2026">2026</option>
+                </select>
+              </div>
+              <div class="pf-c-toolbar__item">
+                <label class="pf-c-toolbar__item-label">Tipo</label>
+                <select class="pf-c-form-control" id="filter-type">
+                  <option value="">Todos</option>
+                  <option value="national">Nacional</option>
+                  <option value="state">Estadual</option>
+                  <option value="municipal">Municipal</option>
+                  <option value="optional">Facultativo</option>
+                </select>
+              </div>
+              <div class="pf-c-toolbar__item" style="flex: 1;">
+                <label class="pf-c-toolbar__item-label">Buscar</label>
+                <input type="text" class="pf-c-form-control" id="filter-search" placeholder="Buscar feriados...">
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="filters">
-          <div class="filter-group">
-            <label>Year</label>
-            <select id="filter-year">
-              <option value="">All Years</option>
-              <option value="2024">2024</option>
-              <option value="2025" selected>2025</option>
-              <option value="2026">2026</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>Type</label>
-            <select id="filter-type">
-              <option value="">All Types</option>
-              <option value="national">National</option>
-              <option value="state">State</option>
-              <option value="municipal">Municipal</option>
-              <option value="optional">Optional</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>Search</label>
-            <input type="text" id="filter-search" placeholder="Search holidays...">
-          </div>
-        </div>
-      </div>
+      </section>
 
       <!-- All Holidays Table -->
-      <div class="card">
-        <div class="card-header">
-          <h2>📋 All Holidays</h2>
+      <section class="pf-c-page__main-section">
+        <div class="pf-c-card">
+          <div class="pf-c-card__header">
+            <h2 class="pf-c-card__title"><i class="fas fa-list"></i> Todos os Feriados</h2>
+          </div>
+          <div class="pf-c-card__body" style="padding: 0;">
+            <table class="pf-c-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Nome</th>
+                  <th>Tipo</th>
+                  <th>Descrição</th>
+                  <th>Recorrente</th>
+                </tr>
+              </thead>
+              <tbody id="holidays-table-body">
+                <tr>
+                  <td colspan="5" style="text-align: center;">
+                    <span class="pf-c-spinner pf-m-md"></span> Carregando...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Description</th>
-                <th>Recurring</th>
-              </tr>
-            </thead>
-            <tbody id="holidays-table-body">
-              <tr>
-                <td colspan="5" style="text-align: center;">Loading...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      </section>
 
       <!-- Check Date -->
-      <div class="card">
-        <div class="card-header">
-          <h2>📆 Check if Date is Holiday</h2>
-        </div>
-        <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
-          <div class="filter-group">
-            <label>Date (DD/MM/YYYY)</label>
-            <input type="text" id="check-date" placeholder="25/12/2025" pattern="\d{2}/\d{2}/\d{4}">
+      <section class="pf-c-page__main-section">
+        <div class="pf-c-card">
+          <div class="pf-c-card__header">
+            <h2 class="pf-c-card__title"><i class="fas fa-search"></i> Verificar se uma Data é Feriado</h2>
           </div>
-          <button class="btn btn-primary" id="check-date-btn">Check</button>
+          <div class="pf-c-card__body">
+            <div class="pf-c-toolbar">
+              <div class="pf-c-toolbar__item">
+                <label class="pf-c-toolbar__item-label">Data (DD/MM/AAAA)</label>
+                <input type="text" class="pf-c-form-control" id="check-date" placeholder="25/12/2025" pattern="\d{2}/\d{2}/\d{4}">
+              </div>
+              <div class="pf-c-toolbar__item" style="align-self: flex-end;">
+                <button class="pf-c-button pf-m-primary" id="check-date-btn">
+                  <i class="fas fa-check"></i> Verificar
+                </button>
+              </div>
+            </div>
+            <div id="check-result" style="margin-top: var(--pf-global--spacer--md); display: none;">
+              <div id="check-result-content"></div>
+            </div>
+          </div>
         </div>
-        <div id="check-result" style="margin-top: 1rem; display: none;">
-          <div id="check-result-content"></div>
-        </div>
-      </div>
+      </section>
     </main>
   </div>
 
   <!-- Toast Container -->
-  <div class="toast-container" id="toast-container"></div>
+  <div class="pf-c-alert-group" id="toast-container"></div>
 
   <script>
     const API_URL = '/api';
@@ -169,8 +219,9 @@
       window.location.href = '/admin/dashboard.html';
     }
 
-    // Display user name
+    // Display user info
     document.getElementById('user-name').textContent = currentUser.name || currentUser.email;
+    document.getElementById('user-avatar').textContent = (currentUser.name || currentUser.email || 'U').charAt(0).toUpperCase();
 
     // API helpers
     async function apiRequest(endpoint, options = {}) {
@@ -196,14 +247,22 @@
     // Toast notifications
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
+      const icons = {
+        success: 'fa-check-circle',
+        danger: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+      };
+      
       const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = message;
+      toast.className = `pf-c-alert pf-m-${type}`;
+      toast.innerHTML = `
+        <div class="pf-c-alert__icon"><i class="fas ${icons[type]}"></i></div>
+        <div class="pf-c-alert__title">${message}</div>
+      `;
       container.appendChild(toast);
       
-      setTimeout(() => {
-        toast.remove();
-      }, 3000);
+      setTimeout(() => toast.remove(), 4000);
     }
 
     // Logout
@@ -212,6 +271,14 @@
       localStorage.removeItem('user');
       window.location.href = '/login.html';
     });
+
+    // Type labels
+    const typeLabels = {
+      national: { label: 'Nacional', class: 'pf-m-blue' },
+      state: { label: 'Estadual', class: 'pf-m-green' },
+      municipal: { label: 'Municipal', class: 'pf-m-orange' },
+      optional: { label: 'Facultativo', class: 'pf-m-purple' }
+    };
 
     // Load holidays
     async function loadHolidays() {
@@ -226,11 +293,10 @@
 
       const data = await apiRequest(`/holidays${query}`);
       
-      if (data.success) {
+      if (data && data.success) {
         renderHolidaysTable(data.data);
         document.getElementById('total-holidays').textContent = data.pagination.total;
         
-        // Count national
         const national = data.data.filter(h => h.type === 'national').length;
         document.getElementById('national-holidays').textContent = national;
       }
@@ -238,7 +304,7 @@
 
     async function loadUpcoming() {
       const data = await apiRequest('/holidays/upcoming?days=30');
-      if (data.success) {
+      if (data && data.success) {
         document.getElementById('upcoming-holidays').textContent = data.data.length;
         renderUpcomingTable(data.data);
       }
@@ -248,37 +314,62 @@
       const tbody = document.getElementById('holidays-table-body');
       
       if (holidays.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No holidays found</td></tr>';
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5">
+              <div class="pf-c-empty-state">
+                <div class="pf-c-empty-state__icon"><i class="fas fa-calendar-times"></i></div>
+                <div class="pf-c-empty-state__title">Nenhum feriado encontrado</div>
+                <div class="pf-c-empty-state__body">Tente ajustar os filtros de busca.</div>
+              </div>
+            </td>
+          </tr>
+        `;
         return;
       }
 
-      tbody.innerHTML = holidays.map(holiday => `
-        <tr>
-          <td><strong>${holiday.date}</strong></td>
-          <td>${holiday.name}</td>
-          <td><span class="badge badge-${holiday.type}">${holiday.type}</span></td>
-          <td>${holiday.description || '-'}</td>
-          <td>${holiday.recurring ? '✅' : '❌'}</td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = holidays.map(holiday => {
+        const typeInfo = typeLabels[holiday.type] || { label: holiday.type, class: 'pf-m-cyan' };
+        return `
+          <tr>
+            <td><strong>${holiday.date}</strong></td>
+            <td>${holiday.name}</td>
+            <td><span class="pf-c-label ${typeInfo.class}">${typeInfo.label}</span></td>
+            <td>${holiday.description || '-'}</td>
+            <td>${holiday.recurring ? '<i class="fas fa-check-circle" style="color: var(--pf-global--success-color--100);"></i>' : '<i class="fas fa-times-circle" style="color: var(--pf-global--Color--200);"></i>'}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function renderUpcomingTable(holidays) {
       const tbody = document.getElementById('upcoming-table-body');
       
       if (holidays.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No upcoming holidays in the next 30 days</td></tr>';
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4">
+              <div class="pf-c-empty-state" style="padding: var(--pf-global--spacer--lg);">
+                <div class="pf-c-empty-state__icon"><i class="fas fa-calendar-check"></i></div>
+                <div class="pf-c-empty-state__title">Nenhum feriado nos próximos 30 dias</div>
+              </div>
+            </td>
+          </tr>
+        `;
         return;
       }
 
-      tbody.innerHTML = holidays.map(holiday => `
-        <tr>
-          <td><strong>${holiday.date}</strong></td>
-          <td>${holiday.name}</td>
-          <td><span class="badge badge-${holiday.type}">${holiday.type}</span></td>
-          <td>${holiday.description || '-'}</td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = holidays.map(holiday => {
+        const typeInfo = typeLabels[holiday.type] || { label: holiday.type, class: 'pf-m-cyan' };
+        return `
+          <tr>
+            <td><strong>${holiday.date}</strong></td>
+            <td>${holiday.name}</td>
+            <td><span class="pf-c-label ${typeInfo.class}">${typeInfo.label}</span></td>
+            <td>${holiday.description || '-'}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     // Filter listeners
@@ -296,7 +387,7 @@
     document.getElementById('check-date-btn').addEventListener('click', async () => {
       const date = document.getElementById('check-date').value;
       if (!date) {
-        showToast('Please enter a date', 'error');
+        showToast('Por favor, insira uma data', 'warning');
         return;
       }
 
@@ -306,26 +397,41 @@
       
       resultDiv.style.display = 'block';
       
-      if (data.success) {
+      if (data && data.success) {
         if (data.data.is_holiday) {
-          const holidays = data.data.holidays.map(h => `<li><strong>${h.name}</strong> (${h.type})</li>`).join('');
+          const holidays = data.data.holidays.map(h => {
+            const typeInfo = typeLabels[h.type] || { label: h.type, class: 'pf-m-cyan' };
+            return `<li><strong>${h.name}</strong> <span class="pf-c-label ${typeInfo.class}">${typeInfo.label}</span></li>`;
+          }).join('');
           contentDiv.innerHTML = `
-            <div style="background: #dcfce7; padding: 1rem; border-radius: 8px; color: #16a34a;">
-              <strong>✅ Yes! ${date} is a holiday.</strong>
-              <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">${holidays}</ul>
+            <div class="pf-c-alert pf-m-success">
+              <div class="pf-c-alert__icon"><i class="fas fa-check-circle"></i></div>
+              <div>
+                <div class="pf-c-alert__title">Sim! ${date} é um feriado</div>
+                <div class="pf-c-alert__description">
+                  <ul style="margin: var(--pf-global--spacer--sm) 0 0 var(--pf-global--spacer--md); padding: 0;">${holidays}</ul>
+                </div>
+              </div>
             </div>
           `;
         } else {
           contentDiv.innerHTML = `
-            <div style="background: #fee2e2; padding: 1rem; border-radius: 8px; color: #dc2626;">
-              <strong>❌ No, ${date} is not a holiday.</strong>
+            <div class="pf-c-alert pf-m-info">
+              <div class="pf-c-alert__icon"><i class="fas fa-info-circle"></i></div>
+              <div>
+                <div class="pf-c-alert__title">Não, ${date} não é um feriado</div>
+              </div>
             </div>
           `;
         }
       } else {
         contentDiv.innerHTML = `
-          <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; color: #d97706;">
-            <strong>⚠️ Error:</strong> ${data.error}
+          <div class="pf-c-alert pf-m-warning">
+            <div class="pf-c-alert__icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div>
+              <div class="pf-c-alert__title">Erro ao verificar</div>
+              <div class="pf-c-alert__description">${data?.error || 'Erro desconhecido'}</div>
+            </div>
           </div>
         `;
       }
